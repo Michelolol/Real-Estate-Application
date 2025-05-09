@@ -6,7 +6,7 @@ def menu(userid):
         print("\n=== Client Menu ===")
         print("1. View Available Properties")
         print("2. Book a Property")
-        print("3. Write a Review")
+        print("3. Manage Reviews")
         print("4. View My Contracts")
         print("0. Exit")
 
@@ -17,7 +17,7 @@ def menu(userid):
         elif choice == "2":
             book_property(userid)
         elif choice == "3":
-            write_review(userid)
+            manage_reviews(userid)
         elif choice == "4":
             view_contracts(userid)
         elif choice == "0":
@@ -68,25 +68,49 @@ def book_property(userid):
     except Exception as e:
         print("Booking failed:", e)
 
-# --- Write a Review ---
-def write_review(userid):
-    try:
-        property_id = int(input("Enter Property ID to review: "))
-        review_text = input("Enter your review: ")
+# --- Manage a Review/ Write ---
+def manage_reviews(userid):
+    conn = psycopg2.connect(DB_URL)
+    cur = conn.cursor()
 
-        conn = psycopg2.connect(DB_URL)
-        cur = conn.cursor()
+    # View existing reviews
+    cur.execute("""
+        SELECT R.propertyid, P.description, R.review
+        FROM Reviews R
+        JOIN Properties P ON R.propertyid = P.propertyid
+        WHERE R.userid = %s
+    """, (userid,))
+    rows = cur.fetchall()
 
-        cur.execute("""
-            INSERT INTO Reviews (userid, propertyid, review)
-            VALUES (%s, %s, %s)
-        """, (userid, property_id, review_text))
-        conn.commit()
-        cur.close()
-        conn.close()
-        print("Review submitted.")
-    except Exception as e:
-        print("Failed to submit review:", e)
+    print("\n--- My Reviews ---")
+    if not rows:
+        print("You have not written any reviews.")
+    else:
+        for row in rows:
+            print(f"""
+Property ID:   {row[0]}
+Description:   {row[1]}
+Review:        {row[2]}
+""")
+
+    # Ask if they want to add one
+    choice = input("Would you like to add a new review? (y/n): ").lower()
+    if choice == 'y':
+        try:
+            property_id = int(input("Enter Property ID to review: "))
+            review_text = input("Enter your review: ")
+
+            cur.execute("""
+                INSERT INTO Reviews (userid, propertyid, review)
+                VALUES (%s, %s, %s)
+            """, (userid, property_id, review_text))
+            conn.commit()
+            print("Review submitted.")
+        except Exception as e:
+            print("Failed to submit review:", e)
+
+    cur.close()
+    conn.close()
 
         # --- View Contracts ---
 def view_contracts(userid):
