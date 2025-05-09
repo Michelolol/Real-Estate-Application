@@ -70,9 +70,8 @@ def view_menu():
 def remove_menu():
     while True:
         print("\n-- REMOVE Menu --")
-        print("1. Remove User by Email")
-        print("2. Remove Agent by Email")
-        print("3. Remove Property by ID")
+        print("1. Remove User (and their Agent/Client role if exists)")
+        print("2. Remove Property by ID")
         print("0. Back")
 
         choice = input("Choose an option: ")
@@ -80,8 +79,6 @@ def remove_menu():
         if choice == "1":
             remove_user()
         elif choice == "2":
-            remove_agent()
-        elif choice == "3":
             remove_property()
         elif choice == "0":
             break
@@ -210,30 +207,23 @@ def view_properties():
 # ===== REMOVE FUNCTIONS =====
 
 def remove_user():
-    email = input("User email to remove: ")
-    conn = psycopg2.connect(DB_URL)
-    cur = conn.cursor()
-    cur.execute("DELETE FROM User_Data WHERE emailAddress = %s", (email,))
-    conn.commit()
-    cur.close()
-    conn.close()
-    print("User removed.")
+    try:
+        uid = int(input("Enter User ID to fully remove: "))
+        conn = psycopg2.connect(DB_URL)
+        cur = conn.cursor()
 
-def remove_agent():
-    email = input("Agent email to remove: ")
-    conn = psycopg2.connect(DB_URL)
-    cur = conn.cursor()
-    cur.execute("SELECT userid FROM User_Data WHERE emailAddress = %s", (email,))
-    row = cur.fetchone()
-    if not row:
-        print("Agent not found.")
-    else:
-        uid = row[0]
+        # Remove from role tables if they exist
         cur.execute("DELETE FROM Agent WHERE userid = %s", (uid,))
+        cur.execute("DELETE FROM Client WHERE userid = %s", (uid,))
+
+        # Remove from base user table (cascade removes related foreign keys)
+        cur.execute("DELETE FROM User_Data WHERE userid = %s", (uid,))
         conn.commit()
-        print("Agent removed.")
-    cur.close()
-    conn.close()
+        cur.close()
+        conn.close()
+        print("User and related roles removed.")
+    except Exception as e:
+        print("Error:", e)
 
 def remove_property():
     pid = int(input("Property ID to remove: "))
