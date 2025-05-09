@@ -48,7 +48,7 @@ def view_menu():
         print("\n-- VIEW Menu --")
         print("1. View All Users")
         print("2. View All Properties")
-        
+        print("3. View Users by Role")
         print("0. Back")
 
         choice = input("Choose an option: ")
@@ -57,6 +57,8 @@ def view_menu():
             view_users()
         elif choice == "2":
             view_properties()
+        elif choice == "3":
+            view_users_by_role()
         elif choice == "0":
             break
         else:
@@ -192,6 +194,36 @@ def view_properties():
     print("\nProperties:")
     for row in rows:
         print(f"ID: {row[0]}, ${row[1]}, Location: {row[2]}, {row[3]}")
+
+def view_users_by_role():
+    role = input("Enter role to filter (agent/client): ").lower()
+    if role not in ("agent", "client"):
+        print("Invalid role.")
+        return
+
+    conn = psycopg2.connect(DB_URL)
+    cur = conn.cursor()
+
+    if role == "agent":
+        cur.execute("""
+            SELECT U.userid, U.emailAddress, U.firstName, U.lastName
+            FROM User_Data U
+            JOIN Agent A ON U.userid = A.userid
+        """)
+    else:
+        cur.execute("""
+            SELECT U.userid, U.emailAddress, U.firstName, U.lastName
+            FROM User_Data U
+            JOIN Client C ON U.userid = C.userid
+        """)
+
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    print(f"\nUsers with role '{role}':")
+    for row in rows:
+        print(f"ID: {row[0]}, Email: {row[1]}, Name: {row[2]} {row[3]}")
 
 # ===== REMOVE FUNCTIONS =====
 
