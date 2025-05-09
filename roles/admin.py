@@ -26,26 +26,21 @@ def menu(userid):
 def insert_menu():
     while True:
         print("\n-- INSERT Menu --")
-        print("1. Insert New User")
-        print("2. Insert New Agent")
-        print("3. Insert New Client")
-        print("4. Insert New Property")
+        print("1. Insert New User with Role")
+        print("2. Insert New Property")
         print("0. Back")
 
         choice = input("Choose an option: ")
 
         if choice == "1":
-            insert_user()
+            insert_user_with_role()
         elif choice == "2":
-            insert_agent()
-        elif choice == "3":
-            insert_client()
-        elif choice == "4":
             insert_property()
         elif choice == "0":
             break
         else:
             print("Invalid option.")
+
 
 # VIEW submenu
 def view_menu():
@@ -53,6 +48,7 @@ def view_menu():
         print("\n-- VIEW Menu --")
         print("1. View All Users")
         print("2. View All Properties")
+        
         print("0. Back")
 
         choice = input("Choose an option: ")
@@ -87,64 +83,57 @@ def remove_menu():
 
 # ===== INSERT FUNCTIONS =====
 
-def insert_user():
+def insert_user_with_role():
     try:
-        uid = int(input("User ID: "))
+        uid = int(input("New User ID: "))
         email = input("Email: ")
         fname = input("First name: ")
         mname = input("Middle name (optional): ")
         lname = input("Last name: ")
         pw = input("Password: ")
+        role = input("Assign Role (admin / agent / client): ").lower()
 
         conn = psycopg2.connect(DB_URL)
         cur = conn.cursor()
+
+        # Insert into User_Data
         cur.execute("""
             INSERT INTO User_Data (userid, emailAddress, firstName, middleName, lastName, password)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (uid, email, fname, mname or None, lname, pw))
+
+        # Insert into Agent or Client if applicable
+        if role == 'agent':
+            contact = input("Contact info: ")
+            job = input("Job title: ")
+            agency = input("Agency: ")
+            cur.execute("""
+                INSERT INTO Agent (userid, contactInfo, jobTitle, agency)
+                VALUES (%s, %s, %s, %s)
+            """, (uid, contact, job, agency))
+
+        elif role == 'client':
+            budget = float(input("Budget: "))
+            date = input("Desired Move Date (YYYY-MM-DD): ")
+            cur.execute("""
+                INSERT INTO Client (userid, budget, desiredMoveDate)
+                VALUES (%s, %s, %s)
+            """, (uid, budget, date))
+
+        elif role == 'admin':
+            print("Admin role will be recognized automatically (no extra table).")
+
+        else:
+            print("Invalid role. Only admin, agent, client allowed.")
+            conn.rollback()
+            cur.close()
+            conn.close()
+            return
+
         conn.commit()
         cur.close()
         conn.close()
-        print("User inserted.")
-    except Exception as e:
-        print("Error:", e)
-
-def insert_agent():
-    try:
-        uid = int(input("User ID (must exist in User_Data): "))
-        contact = input("Contact info: ")
-        job = input("Job title: ")
-        agency = input("Agency: ")
-
-        conn = psycopg2.connect(DB_URL)
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO Agent (userid, contactInfo, jobTitle, agency)
-            VALUES (%s, %s, %s, %s)
-        """, (uid, contact, job, agency))
-        conn.commit()
-        cur.close()
-        conn.close()
-        print("Agent inserted.")
-    except Exception as e:
-        print("Error:", e)
-
-def insert_client():
-    try:
-        uid = int(input("User ID (must exist in User_Data): "))
-        budget = float(input("Budget: "))
-        date = input("Desired Move Date (YYYY-MM-DD): ")
-
-        conn = psycopg2.connect(DB_URL)
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO Client (userid, budget, desiredMoveDate)
-            VALUES (%s, %s, %s)
-        """, (uid, budget, date))
-        conn.commit()
-        cur.close()
-        conn.close()
-        print("Client inserted.")
+        print("User with role inserted successfully.")
     except Exception as e:
         print("Error:", e)
 
