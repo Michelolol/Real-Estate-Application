@@ -11,15 +11,7 @@ def main():
         print("Invalid login credentials.")
         return
 
-    role = user['role']
-    print(f"Logged in as {role.capitalize()}")
-
-    if role == "admin":
-        admin.menu(user['userid'])
-    elif role == "agent":
-        agent.menu(user['userid'])
-    elif role == "client":
-        client.menu(user['userid'])
+    base_menu(user)
 
 if __name__ == "__main__":
     main()
