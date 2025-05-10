@@ -29,7 +29,6 @@ def menu(userid):
         elif choice == "4":
             clear()
             view_property_reviews(userid)
-        choice = input("Choose an option: ")
         elif choice == "5":
             clear()
             view_neighborhoods()
