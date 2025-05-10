@@ -12,6 +12,7 @@ def menu(userid):
         print("2. Add New Property")
         print("3. Remove a Property")
         print("4. View Reviews on My Properties")
+        print("5. View Neighborhoods")
         print("0. Exit")
 
         choice = input("Choose an option: ")
@@ -28,6 +29,10 @@ def menu(userid):
         elif choice == "4":
             clear()
             view_property_reviews(userid)
+        choice = input("Choose an option: ")
+        elif choice == "5":
+            clear()
+            view_neighborhoods()
         elif choice == "0":
             print("Goodbye!")
             break
@@ -59,6 +64,21 @@ Price:         ${row[2]}
 Location:      {row[3]}, {row[4]}
 """)
 
+def view_neighborhoods():
+    import psycopg2
+    from config import DB_URL
+
+    conn = psycopg2.connect(DB_URL)
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Neighborhood")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    print("\nNeighborhoods:")
+    for row in rows:
+        print(f"ID: {row[0]}, Avg Price: ${row[1]:,.2f}, Crime Rate: {row[2]}")
+    input("\nPress Enter to return...")
 # --- Insert ---
 def add_property(userid):
     try:

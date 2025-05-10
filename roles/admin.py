@@ -35,6 +35,7 @@ def insert_menu():
         print("\n-- INSERT Menu --")
         print("1. Insert New User with Role")
         print("2. Insert New Property")
+        print("3. Insert New Neighborhood")  # NEW OPTION
         print("0. Back")
 
         choice = input("Choose an option: ")
@@ -45,11 +46,13 @@ def insert_menu():
         elif choice == "2":
             clear()
             insert_property()
+        elif choice == "3":
+            clear()
+            insert_neighborhood()  # NEW FUNCTION
         elif choice == "0":
             break
         else:
             print("Invalid option.")
-
 
 # VIEW submenu
 def view_menu():
@@ -58,6 +61,7 @@ def view_menu():
         print("1. View All Users")
         print("2. View All Properties")
         print("3. View Users by Role")
+        print("4. View Neighborhoods")  # NEW OPTION
         print("0. Back")
 
         choice = input("Choose an option: ")
@@ -71,10 +75,14 @@ def view_menu():
         elif choice == "3":
             clear()
             view_users_by_role()
+        elif choice == "4":
+            clear()
+            view_neighborhoods()  # NEW FUNCTION
         elif choice == "0":
             break
         else:
             print("Invalid option.")
+
 
 # REMOVE submenu
 def remove_menu():
@@ -185,6 +193,25 @@ def insert_property():
     except Exception as e:
         print("Error:", e)
 
+def insert_neighborhood():
+    try:
+        nid = int(input("Neighborhood ID: "))
+        avg_price = float(input("Average Price: "))
+        crime_rate = float(input("Crime Rate: "))
+
+        conn = psycopg2.connect(DB_URL)
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO Neighborhood (neighborhoodid, averagePrice, crimeRate)
+            VALUES (%s, %s, %s)
+        """, (nid, avg_price, crime_rate))
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("Neighborhood inserted successfully.")
+    except Exception as e:
+        print("Error inserting neighborhood:", e)
+
 # ===== VIEW FUNCTIONS =====
 
 def view_users():
@@ -240,6 +267,20 @@ def view_users_by_role():
     print(f"\nUsers with role '{role}':")
     for row in rows:
         print(f"ID: {row[0]}, Email: {row[1]}, Name: {row[2]} {row[3]}")
+
+def view_neighborhoods():
+    conn = psycopg2.connect(DB_URL)
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Neighborhood")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    print("\nNeighborhoods:")
+    for row in rows:
+        print(f"ID: {row[0]}, Avg Price: ${row[1]:,.2f}, Crime Rate: {row[2]}")
+    input("\nPress Enter to return...")
+
 
 # ===== REMOVE FUNCTIONS =====
 

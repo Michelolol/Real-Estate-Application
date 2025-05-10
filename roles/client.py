@@ -12,6 +12,8 @@ def menu(userid):
         print("2. Book a Property")
         print("3. Manage Reviews")
         print("4. View My Contracts")
+        print("5. View Rewards")
+        print("6. View Neighborhoods")
         print("0. Exit")
 
         choice = input("Choose an option: ")
@@ -29,6 +31,12 @@ def menu(userid):
         elif choice == "4":
             clear()
             view_contracts(userid)
+        elif choice == "5":
+            clear()
+            view_rewards(userid)
+        elif choice == "6":
+            clear()
+            view_neighborhoods()
         elif choice == "0":
             clear()
             print("Goodbye!")
@@ -149,3 +157,46 @@ Location:      {row[2]}, {row[3]}
 Start Date:    {row[4]}
 End Date:      {row[5]}
 """)
+        
+def view_neighborhoods():
+    import psycopg2
+    from config import DB_URL
+
+    conn = psycopg2.connect(DB_URL)
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Neighborhood")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    print("\nNeighborhoods:")
+    for row in rows:
+        print(f"ID: {row[0]}, Avg Price: ${row[1]:,.2f}, Crime Rate: {row[2]}")
+    input("\nPress Enter to return...")
+
+def view_rewards(userid):
+    try:
+        conn = psycopg2.connect(DB_URL)
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT totalPoints, activated
+            FROM ClientRewards
+            WHERE userid = %s
+        """, (userid,))
+
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if row:
+            print("\n--- Rewards Summary ---")
+            print(f"Total Points: {row[0]}")
+            print(f"Activated: {'Yes' if row[1] else 'No'}")
+        else:
+            print("No rewards found.")
+
+    except Exception as e:
+        print("Error fetching rewards:", e)
+
+    input("\nPress Enter to return...")
