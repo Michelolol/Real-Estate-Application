@@ -21,6 +21,7 @@ def menu(userid):
             view_available_properties()
         elif choice == "2":
             clear()
+            view_available_properties()
             book_property(userid)
         elif choice == "3":
             clear()

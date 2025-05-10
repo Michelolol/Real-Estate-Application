@@ -63,10 +63,13 @@ def view_menu():
         choice = input("Choose an option: ")
 
         if choice == "1":
+            clear()
             view_users()
         elif choice == "2":
+            clear()
             view_properties()
         elif choice == "3":
+            clear()
             view_users_by_role()
         elif choice == "0":
             break
@@ -85,9 +88,11 @@ def remove_menu():
 
         if choice == "1":
             clear()
+            view_users()
             remove_user()
         elif choice == "2":
             clear()
+            view_properties()
             remove_property()
         elif choice == "0":
             break
