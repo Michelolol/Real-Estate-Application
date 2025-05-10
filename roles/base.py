@@ -2,6 +2,10 @@
 import psycopg2
 from config import DB_URL
 from roles import admin, agent, client
+import os
+
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def base_menu(user):
     while True:
@@ -14,12 +18,16 @@ def base_menu(user):
         choice = input("Choose an option: ")
 
         if choice == "1":
+            clear()
             view_profile(user['userid'])
         elif choice == "2":
+            clear()
             launch_role_menu(user)
         elif choice == "3":
+            clear()
             update_profile(user['userid'])
         elif choice == "0":
+            clear()
             print("Logging out...")
             break
         else:

@@ -1,5 +1,9 @@
 import psycopg2
 from config import DB_URL
+import os
+
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def menu(userid):
     while True:
@@ -12,10 +16,13 @@ def menu(userid):
         choice = input("Choose an option: ")
 
         if choice == "1":
+            clear()
             insert_menu()
         elif choice == "2":
+            clear()
             view_menu()
         elif choice == "3":
+            clear()
             remove_menu()
         elif choice == "0":
             break
@@ -33,8 +40,10 @@ def insert_menu():
         choice = input("Choose an option: ")
 
         if choice == "1":
+            clear()
             insert_user_with_role()
         elif choice == "2":
+            clear()
             insert_property()
         elif choice == "0":
             break
@@ -75,8 +84,10 @@ def remove_menu():
         choice = input("Choose an option: ")
 
         if choice == "1":
+            clear()
             remove_user()
         elif choice == "2":
+            clear()
             remove_property()
         elif choice == "0":
             break

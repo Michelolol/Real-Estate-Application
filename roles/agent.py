@@ -1,5 +1,9 @@
 import psycopg2
 from config import DB_URL
+import os
+
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def menu(userid):
     while True:
@@ -13,12 +17,16 @@ def menu(userid):
         choice = input("Choose an option: ")
 
         if choice == "1":
+            clear()
             view_my_properties(userid)
         elif choice == "2":
+            clear()
             add_property(userid)
         elif choice == "3":
+            clear()
             remove_property(userid)
         elif choice == "4":
+            clear()
             view_property_reviews(userid)
         elif choice == "0":
             print("Goodbye!")
